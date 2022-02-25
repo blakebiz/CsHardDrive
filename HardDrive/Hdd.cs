@@ -9,7 +9,7 @@ namespace HardDrive
 {
 
 
-    public class Hdd
+    public class Hdd : IHddObject
     {
         public List<IHddObject> Files { get; private set; } = new List<IHddObject>();
         public List<string> Tags { get; private set; }= new List<string>();
@@ -79,11 +79,13 @@ namespace HardDrive
         /// </summary>
         /// <remarks> Tags are used to search through files for given tag(s) </remarks>
         /// <param name="files"></param>
-        public void SetTags(List<IHddObject>? files = null)
+        /// <param name="clearOld"> Whether or not to clear the previous tags attached to the object.
+        /// You should probably never touch this parameter</param>
+        public void SetTags(List<IHddObject>? files = null, bool clearOld = true)
         {
             files ??= this.Files;
-            // TODO This method needs to be updated to work with HddDir objects
-            this.Tags = new List<string>();
+            // TODO This method needs to be updated to work with Hdd objects
+            if (clearOld) this.Tags = new List<string>();
             foreach (IHddObject file in this.Files)
             {
                 if (file is HddFile hddFile)
@@ -96,13 +98,9 @@ namespace HardDrive
                         }
                     }
                 }
-                else if (file is HddDir)
+                else if (file is Hdd hdd)
                 {
-                    HddDir hddDir = (HddDir)file;
-                    foreach (HddDir dir in hddDir.Dirs)
-                    {
-                        this.SetTags();
-                    }
+                    this.SetTags(hdd.Files, false);
                 }
             }
         }
@@ -166,22 +164,7 @@ namespace HardDrive
         /// </summary>
         /// <param name="dir"> The hdd dir to search for files </param>
         /// <returns> List of HddFile objects found in the directories </returns>
-        List<HddFile> GetFiles(HddDir dir)
-        {
-            List<HddFile> files = dir.Files.ToList();
-            foreach (HddDir subDir in dir.Dirs)
-            {
-                files.AddRange(this.GetFiles(subDir));
-            }
-            return files;
-        }
-
-        /// <summary>
-        /// Returns all files in the hard drive as well as within any of it's directories or subdirectories
-        /// as a flattened list
-        /// </summary>
-        /// <returns> Flattened list of HddFile objects found in the Hdd </returns>
-        List<HddFile> GetAllFiles()
+        List<HddFile> GetFiles()
         {
             List<HddFile> files = new List<HddFile>();
             foreach (IHddObject file in this.Files)
@@ -190,14 +173,15 @@ namespace HardDrive
                 {
                     files.Add(hddFile);
                 }
-                else if (file is HddDir hddDir)
+                else if (file is Hdd hdd)
                 {
-                    files.AddRange(this.GetFiles(hddDir));
+                    files.AddRange(this.GetFiles());
                 }
             }
 
             return files;
         }
+        
 
         /// <summary>
         /// Searches the hard drive for files with **all** of the given tags. For now this will delete
@@ -211,7 +195,7 @@ namespace HardDrive
         /// <returns> Returns the new list of files </returns>
         public List<IHddObject> StrictTagsBySet(List<string> tags, bool apply = true, bool log = true)
         {
-            // TODO update to not delete HddDir objects
+            // TODO update to not delete Hdd objects
             
             // if user wants to apply filters and log the search filters. If user doesn't want to apply,
             // then we don't want to log the search filters.
@@ -231,7 +215,7 @@ namespace HardDrive
             }
             // code added to handle hard drive directories but needs to be reworked
             // just gets all files from any directories but this causes the directory to be deleted
-            List<HddFile> files = this.GetAllFiles();
+            List<HddFile> files = this.GetFiles();
             
             // iterate through the files
             foreach (HddFile file in files)

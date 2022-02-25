@@ -7,32 +7,31 @@ namespace HardDrive
 
     public class HddFile: IHddObject
     {
-        private int id;
+        public int Id { get; }
 
-        private HashSet<string> tags = new HashSet<string>();
+        public HashSet<string> Tags { get; private set; } = new HashSet<string>();
 
         // stores the data in the file
-        private object source_reference;
+        public object SourceReference { get; private set; }
 
         // for storing the path to original file
-        private string path;
+        public string Path { get; }
 
         // for storing the type of file
-        private string extension;
+        public string Extension { get; private set;}
 
         // this should probably be moved elsewhere, just don't touch this attribute
-        private int relevance = 0;
+        public int Relevance { get; set; } = 0;
 
         // file types allowed to be stored by an HddFile (whatever we have support built for so far
-        HashSet<string> image_extensions = new HashSet<string>() {".xlsm", ".xlsx", ".csv", ".txt"};
+        public HashSet<string> ImageExtensions { get; }= new HashSet<string>() {".xlsm", ".xlsx", ".csv", ".txt"};
 
-
-
+        
         public HddFile(string[] tags)
         {
             foreach (string tag in tags)
             {
-                this.tags.Add(tag.ToLower());
+                this.Tags.Add(tag.ToLower());
             }
         }
 
@@ -40,47 +39,47 @@ namespace HardDrive
         {
             foreach (string tag in tags)
             {
-                this.tags.Add(tag.ToLower());
+                this.Tags.Add(tag.ToLower());
             }
         }
 
-        public HddFile(string[] tags, object source_ref)
+        public HddFile(string[] tags, object sourceRef)
         {
             foreach (string tag in tags)
             {
-                this.tags.Add(tag.ToLower());
+                this.Tags.Add(tag.ToLower());
             }
 
-            this.source_reference = source_ref;
+            this.SourceReference = sourceRef;
         }
 
-        public HddFile(List<string> tags, object source_ref)
+        public HddFile(List<string> tags, object sourceRef)
         {
             foreach (string tag in tags)
             {
-                this.tags.Add(tag.ToLower());
+                this.Tags.Add(tag.ToLower());
             }
 
-            this.source_reference = source_ref;
+            this.SourceReference = sourceRef;
         }
 
-        public HddFile(object source_ref)
+        public HddFile(object sourceRef)
         {
-            this.source_reference = source_ref;
+            this.SourceReference = sourceRef;
         }
 
         public HddFile(int id, string[] tags)
         {
-            this.id = id;
+            this.Id = id;
             foreach (string tag in tags)
             {
-                this.tags.Add(tag.ToLower());
+                this.Tags.Add(tag.ToLower());
             }
         }
 
         public HddFile(string path, bool convert = true)
         {
-            this.path = path;
+            this.Path = path;
             if (convert)
             {
                 this.FetchData();
@@ -93,31 +92,31 @@ namespace HardDrive
         /// </summary>
         public void FetchData()
         {
-            if (this.path.EndsWith(".txt"))
+            if (this.Path.EndsWith(".txt"))
             {
-                this.txtToFile();
+                this.TxtToFile();
             }
-            else if (this.path.EndsWith(".xlsm") || this.path.EndsWith(".xlsx") || this.path.EndsWith(".csv"))
+            else if (this.Path.EndsWith(".xlsm") || this.Path.EndsWith(".xlsx") || this.Path.EndsWith(".csv"))
             {
-                this.source_reference = Spreadsheet.LoadFile(this.path);
+                this.SourceReference = Spreadsheet.LoadFile(this.Path);
             }
             else
             {
                 throw new Exception("Invalid file type given");
             }
 
-            int start = this.path.LastIndexOf('\\');
-            int stop = this.path.LastIndexOf('.');
-            this.extension = this.path.Substring(stop);
-            string file_name = this.path.Substring(start + 1, stop - start - 1);
-            if (ReferenceEquals(null, this.tags))
+            int start = this.Path.LastIndexOf('\\');
+            int stop = this.Path.LastIndexOf('.');
+            this.Extension = this.Path.Substring(stop);
+            string file_name = this.Path.Substring(start + 1, stop - start - 1);
+            if (ReferenceEquals(null, this.Tags))
             {
-                this.tags = new HashSet<string>() {file_name, this.path};
+                this.Tags = new HashSet<string>() {file_name, this.Path};
             }
             else
             {
-                this.tags.Add(file_name);
-                this.tags.Add(this.path);
+                this.Tags.Add(file_name);
+                this.Tags.Add(this.Path);
             }
             
         }
@@ -126,27 +125,27 @@ namespace HardDrive
         {
             string vals = "{";
             int count = 0;
-            foreach (string tag in this.tags)
+            foreach (string tag in this.Tags)
             {
                 vals += tag;
                 count++;
-                if (count != this.tags.Count)
+                if (count != this.Tags.Count)
                 {
                     vals += ", ";
                 }
             }
 
             vals += "}";
-            return this.id + ", " + vals;
+            return this.Id + ", " + vals;
         }
 
         /// <summary>
         /// Reads the data from the .txt file and stores it in the source_reference attribute.
         /// </summary>
-        public void txtToFile()
+        public void TxtToFile()
         {
             // Sets file name and file path as tag by default
-            this.SourceReference = System.IO.File.ReadAllLines(this.path);
+            this.SourceReference = System.IO.File.ReadAllLines(this.Path);
             
         }
 
@@ -154,48 +153,48 @@ namespace HardDrive
         /// Reads the data from the .csv file and stores it in the source_reference attribute.
         /// </summary>
         /// <param name="delimiter"> The delimiter in the csv file </param>
-        public void csvToFile(string delimiter = ",")
+        public void CsvToFile(string delimiter = ",")
         {
-            this.source_reference = CSVParser.parse(this.path, ",");
+            this.SourceReference = CSVParser.parse(this.Path, ",");
         }
 
 
         // Getters/Setters
-        public int Id
-        {
-            get => id;
-            set => id = value;
-        }
-
-        public object SourceReference
-        {
-            get => source_reference;
-            set => source_reference = value;
-        }
-
-        public HashSet<string> Tags
-        {
-            get => tags;
-            set => tags = value;
-        }
-        
-        public int Relevance
-        {
-            get => relevance;
-            set => relevance = value;
-        }
-
-        public string Path
-        {
-            get => path;
-            set => path = value;
-        }
-
-        public string Extension
-        {
-            get => extension;
-            set => extension = value;
-        }
+        // public int Id
+        // {
+        //     get => id;
+        //     set => id = value;
+        // }
+        //
+        // public object SourceReference
+        // {
+        //     get => sourceReference;
+        //     set => sourceReference = value;
+        // }
+        //
+        // public HashSet<string> Tags
+        // {
+        //     get => tags;
+        //     set => tags = value;
+        // }
+        //
+        // public int Relevance
+        // {
+        //     get => relevance;
+        //     set => relevance = value;
+        // }
+        //
+        // public string Path
+        // {
+        //     get => path;
+        //     set => path = value;
+        // }
+        //
+        // public string Extension
+        // {
+        //     get => extension;
+        //     set => extension = value;
+        // }
 
     }
 }
