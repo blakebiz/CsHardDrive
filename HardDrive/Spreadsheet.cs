@@ -167,7 +167,7 @@ namespace HardDrive
             }
             if (this.worksheets.Count > 0)
             {
-                if (!Directory.Exists("HddStorage")) Directory.CreateDirectory("HddStorage");
+                if (!System.IO.Directory.Exists("HddStorage")) System.IO.Directory.CreateDirectory("HddStorage");
                 if (this.worksheets.Count == 1)
                 {
                     foreach (KeyValuePair<string, List<List<object>>> kv in worksheets)
@@ -194,8 +194,8 @@ namespace HardDrive
                 {
                     
                     string foldername = "HddStorage/" + filename + "_HddXLFolder";
-                    if (!Directory.Exists(foldername))
-                        Directory.CreateDirectory(foldername);
+                    if (!System.IO.Directory.Exists(foldername))
+                        System.IO.Directory.CreateDirectory(foldername);
                     foreach (KeyValuePair<string, List<List<object>>> kv in worksheets)
                     {
                         string fname = GetValidPath($"{foldername}/{kv.Key}", "_HddCsv.csv");
@@ -229,7 +229,7 @@ namespace HardDrive
             if (path.EndsWith("_HddXLFolder"))
             {
                 
-                foreach (string file in Directory.EnumerateFiles(path))
+                foreach (string file in System.IO.Directory.EnumerateFiles(path))
                 {
                     spreadsheet.Add(file, CSVParser.parse_list(path, ","));
                 }
@@ -274,7 +274,7 @@ namespace HardDrive
         {
             string fname = beginning + ending;
             int file_count = 0;
-            while (File.Exists(fname))
+            while (System.IO.File.Exists(fname))
             {
                 file_count++;
                 fname = $"{beginning}({file_count}){ending}";

@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using HardDrive;
+using Directory = System.IO.Directory;
+
 public class PathToHDD
 {
 

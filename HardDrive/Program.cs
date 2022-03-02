@@ -5,6 +5,8 @@ using System.Net.NetworkInformation;
 using System.Runtime.CompilerServices;
 using System.Threading;
  using HardDrive;
+using Directory = HardDrive.Directory;
+using File = HardDrive.File;
 
 class Program
 {
@@ -85,7 +87,7 @@ class Program
         foreach (string result in results)
         {
             // Console.WriteLine(result);
-            HddFile file = new HddFile(result);
+            File file = new File(result);
             files.Add(file);
             // foreach (string s in (string[])file.SourceReference)
             // {
@@ -94,8 +96,8 @@ class Program
             // Console.WriteLine();
         }
         Console.WriteLine("Files Created");
-        Hdd hdd = new Hdd(files, path);
-        foreach (HddFile file in hdd.Files)
+        Directory directory = new Directory(files, path);
+        foreach (File file in directory.Files)
         {
             if (file.Extension == ".xlsx" || file.Extension == ".xlsm")
             {
@@ -160,33 +162,33 @@ class Program
         List<IHddObject> files = new List<IHddObject>();
         foreach (string result in results)
         {
-            files.Add(new HddFile(result));
+            files.Add(new File(result));
         }
-        Hdd hdd = new Hdd(files);
+        Directory directory = new Directory(files);
         // Console.WriteLine(hdd);
     }
     
 
     static void search_hdd()
     {
-        Hdd main_hdd = create_hdd();
+        Directory mainDirectory = create_hdd();
         // Create a list of strings to search for in the hard drive
         List<string> search = new List<string>() {"ar", "buggy"};
         
         // Print out all of the files to be stored in the Hdd
         Console.WriteLine("Files in main hard drive:");
-        foreach (HddFile file in main_hdd.Files) { Console.WriteLine(file); }
+        foreach (File file in mainDirectory.Files) { Console.WriteLine(file); }
         Console.WriteLine();
         
         // Create a copy to perform searches on so the main keeps all original data
-        Hdd copy = main_hdd.Copy();
+        Directory copy = mainDirectory.Copy();
 
         // Perform a "strict" search or an "and" search meaning files found must contain every tag in the search list
         // If apply is not set to false, the search is applied to the harddrive, erasing any irrelevant info
         copy.LooseTagsBySet(search);
 
         Console.WriteLine("Search results:");
-        foreach (HddFile file in copy.Files) { Console.WriteLine(file); }
+        foreach (File file in copy.Files) { Console.WriteLine(file); }
         Console.WriteLine();
         
         
@@ -196,12 +198,12 @@ class Program
         // Destroy old hard drive to prove it's no longer needed
         copy = null;
         // Make a fresh copy of the main hard rive with all of original data
-        copy = main_hdd.Copy();
+        copy = mainDirectory.Copy();
         // Apply the filters previously extracted to recreate previously destroyed hard drive
         copy.ApplyFilters(filters);
         
         Console.WriteLine("Recovered hard drive:");
-        foreach (HddFile file in copy.Files) { Console.WriteLine(file); }
+        foreach (File file in copy.Files) { Console.WriteLine(file); }
         Console.WriteLine();
         
         // You can also clear the filters from a harddrive if you like, idk why you would need to,but you can
@@ -210,7 +212,7 @@ class Program
 
     }
 
-    static Hdd create_hdd(int amt = 10)
+    static Directory create_hdd(int amt = 10)
     {
         // Create an array of tags
         string[] tags = {"desert", "ar", "pistol", "car", "buggy", "dune", "piercing"};
@@ -225,10 +227,10 @@ class Program
         int count = 0;
         // Loop through sample tags and make a Hdd_File object from their unique tags and give it the id of 
         // the variable count which will then be incremented.
-        foreach (string[] tsample in tag_sample) { files.Add(new HddFile(count++, tsample)); }
+        foreach (string[] tsample in tag_sample) { files.Add(new File(count++, tsample)); }
 
         // Initiate a Hdd object with the files created above
-        return new Hdd(files);
+        return new Directory(files);
     }
     
 
@@ -272,9 +274,9 @@ class Program
         int count = 0;
         // Loop through sample tags and make a Hdd_File object from their unique tags and give it the id of 
         // the variable count which will then be incremented.
-        foreach (string[] tsample in tag_sample) { files.Add(new HddFile(count++, tsample)); }
+        foreach (string[] tsample in tag_sample) { files.Add(new File(count++, tsample)); }
 
-        Hdd harddrive = new Hdd(files);
+        Directory harddrive = new Directory(files);
         Console.WriteLine("Tags:");
         foreach (string tag in harddrive.Tags)
         {
@@ -335,14 +337,14 @@ class Program
         int count = 0;
         // Loop through sample tags and make a Hdd_File object from their unique tags and give it the id of 
         // the variable count which will then be incremented.
-        foreach (string[] tsample in tag_sample) { files.Add(new HddFile(count++, tsample)); }
+        foreach (string[] tsample in tag_sample) { files.Add(new File(count++, tsample)); }
         
         // Print out all of the files to be stored in the Hdd
-        foreach (HddFile file in files) { Console.WriteLine(file); }
+        foreach (File file in files) { Console.WriteLine(file); }
         Console.WriteLine("\nDone making files.");
         
         // Initiate a Hdd object with the files created above
-        Hdd harddrive = new Hdd(files);
+        Directory harddrive = new Directory(files);
         
         // Create a list of strings to search for in the hard drive
         List<string> search = new List<string>() {"ar", "buggy"};
@@ -352,7 +354,7 @@ class Program
         
         // Print out results of strict search
         Console.WriteLine("results of strict search");
-        foreach (HddFile file in results) { Console.WriteLine(file); }
+        foreach (File file in results) { Console.WriteLine(file); }
         Console.WriteLine();
         
         // Perform a "loose" search or an "or" search meaning files found must contain only one of the tags in the search
@@ -360,19 +362,19 @@ class Program
         
         // Print out results of loose search
         Console.WriteLine("results of loose search");
-        foreach (HddFile file in results1) { Console.WriteLine(file); }
+        foreach (File file in results1) { Console.WriteLine(file); }
         Console.WriteLine();
         
         // Grab first result of loose search to do a "relevancy" search for
-        HddFile rel = (HddFile)results1[0];
+        File rel = (File)results1[0];
         
         // Perform a relevancy search
-        List<HddFile> results2 = harddrive.GetRelevant(rel, 3);
+        List<File> results2 = harddrive.GetRelevant(rel, 3);
         
         // Print out results of relevancy search
         Console.Write("Performing a relevancy search on: ");
         Console.WriteLine(rel);
-        foreach (HddFile file in results2) { Console.WriteLine(file); }
+        foreach (File file in results2) { Console.WriteLine(file); }
 
     }
 

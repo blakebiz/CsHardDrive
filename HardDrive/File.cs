@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace HardDrive
 {
 
-    public class HddFile: IHddObject
+    public class File: IHddObject
     {
         public int Id { get; }
 
@@ -27,7 +27,7 @@ namespace HardDrive
         public HashSet<string> ImageExtensions { get; }= new HashSet<string>() {".xlsm", ".xlsx", ".csv", ".txt"};
 
         
-        public HddFile(string[] tags)
+        public File(string[] tags)
         {
             foreach (string tag in tags)
             {
@@ -35,7 +35,7 @@ namespace HardDrive
             }
         }
 
-        public HddFile(List<string> tags)
+        public File(List<string> tags)
         {
             foreach (string tag in tags)
             {
@@ -43,17 +43,7 @@ namespace HardDrive
             }
         }
 
-        public HddFile(string[] tags, object sourceRef)
-        {
-            foreach (string tag in tags)
-            {
-                this.Tags.Add(tag.ToLower());
-            }
-
-            this.SourceReference = sourceRef;
-        }
-
-        public HddFile(List<string> tags, object sourceRef)
+        public File(string[] tags, object sourceRef)
         {
             foreach (string tag in tags)
             {
@@ -63,12 +53,22 @@ namespace HardDrive
             this.SourceReference = sourceRef;
         }
 
-        public HddFile(object sourceRef)
+        public File(List<string> tags, object sourceRef)
+        {
+            foreach (string tag in tags)
+            {
+                this.Tags.Add(tag.ToLower());
+            }
+
+            this.SourceReference = sourceRef;
+        }
+
+        public File(object sourceRef)
         {
             this.SourceReference = sourceRef;
         }
 
-        public HddFile(int id, string[] tags)
+        public File(int id, string[] tags)
         {
             this.Id = id;
             foreach (string tag in tags)
@@ -77,7 +77,7 @@ namespace HardDrive
             }
         }
 
-        public HddFile(string path, bool convert = true)
+        public File(string path, bool convert = true)
         {
             this.Path = path;
             if (convert)

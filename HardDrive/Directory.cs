@@ -9,7 +9,7 @@ namespace HardDrive
 {
 
 
-    public class Hdd : IHddObject
+    public class Directory : IHddObject
     {
         public List<IHddObject> Files { get; private set; } = new List<IHddObject>();
         public List<string> Tags { get; private set; }= new List<string>();
@@ -17,49 +17,49 @@ namespace HardDrive
         public string? Path { get; private set; }
         
         
-        public Hdd(string path)
+        public Directory(string path)
         {
             this.Path = path;
         }
 
-        public Hdd(List<IHddObject> file_list)
+        public Directory(List<IHddObject> file_list)
         {
             this.Files = file_list;
             this.SetTags();
         }
 
-        public Hdd(List<IHddObject> file_list, string path)
+        public Directory(List<IHddObject> file_list, string path)
         {
             this.Files = file_list;
             this.SetTags();
             this.Path = path;
         }
 
-        public Hdd(Hdd hdd)
+        public Directory(Directory directory)
         {
             // TODO convert from shallow copy to hard copy
-            this.Files = hdd.Files;
-            this.Tags = hdd.Tags;
-            this.Filters = hdd.Filters;
-            this.Path = hdd.Path;
+            this.Files = directory.Files;
+            this.Tags = directory.Tags;
+            this.Filters = directory.Filters;
+            this.Path = directory.Path;
         }
 
-        public Hdd(Hdd hdd, string path)
+        public Directory(Directory directory, string path)
         {
-            this.Files = hdd.Files;
+            this.Files = directory.Files;
             this.SetTags();
             this.Path = path;
         }
 
-        public Hdd()
+        public Directory()
         {
         }
 
-        public Hdd(List<string> paths)
+        public Directory(List<string> paths)
         {
             foreach (string path in paths)
             {
-                this.Files.Add(new HddFile(path));
+                this.Files.Add(new File(path));
             }
             this.SetTags();
         }
@@ -88,7 +88,7 @@ namespace HardDrive
             if (clearOld) this.Tags = new List<string>();
             foreach (IHddObject file in this.Files)
             {
-                if (file is HddFile hddFile)
+                if (file is File hddFile)
                 {
                     foreach (string tag in hddFile.Tags)
                     {
@@ -98,7 +98,7 @@ namespace HardDrive
                         }
                     }
                 }
-                else if (file is Hdd hdd)
+                else if (file is Directory hdd)
                 {
                     this.SetTags(hdd.Files, false);
                 }
@@ -123,7 +123,7 @@ namespace HardDrive
         /// StrictTagsBySet will return this. You likely never want to manually make this list unless you contact
         /// Blake first. </param>
         /// <returns> New Hdd object with the filters applied to it </returns>
-        public Hdd ApplyFilters(List<List<object>> filters)
+        public Directory ApplyFilters(List<List<object>> filters)
         {
             foreach (List<object> search in filters)
             {
@@ -154,9 +154,9 @@ namespace HardDrive
         /// data and apply filters to it.
         /// </summary>
         /// <returns> A fresh instance of a hard drive with all of the information being the same </returns>
-        public Hdd Copy()
+        public Directory Copy()
         {
-            return new Hdd(this);
+            return new Directory(this);
         }
 
         /// <summary>
@@ -164,16 +164,16 @@ namespace HardDrive
         /// </summary>
         /// <param name="dir"> The hdd dir to search for files </param>
         /// <returns> List of HddFile objects found in the directories </returns>
-        List<HddFile> GetFiles()
+        List<File> GetFiles()
         {
-            List<HddFile> files = new List<HddFile>();
+            List<File> files = new List<File>();
             foreach (IHddObject file in this.Files)
             {
-                if (file is HddFile hddFile)
+                if (file is File hddFile)
                 {
                     files.Add(hddFile);
                 }
-                else if (file is Hdd hdd)
+                else if (file is Directory hdd)
                 {
                     files.AddRange(this.GetFiles());
                 }
@@ -215,10 +215,10 @@ namespace HardDrive
             }
             // code added to handle hard drive directories but needs to be reworked
             // just gets all files from any directories but this causes the directory to be deleted
-            List<HddFile> files = this.GetFiles();
+            List<File> files = this.GetFiles();
             
             // iterate through the files
-            foreach (HddFile file in files)
+            foreach (File file in files)
             {
                 // whether or not the file has all the tags
                 bool hasAllTags = true;
@@ -279,7 +279,7 @@ namespace HardDrive
             }
 
             // Iterate through all files
-            foreach (HddFile file in this.Files)
+            foreach (File file in this.Files)
             {
                 // Iterate through given tags
                 foreach (string tag in tags)
@@ -308,12 +308,12 @@ namespace HardDrive
         /// <param name="file"> The file to compare others to </param>
         /// <param name="count"> The amount of relevant files to return </param>
         /// <returns></returns>
-        public List<HddFile> GetRelevant(HddFile file, int count = 5)
+        public List<File> GetRelevant(File file, int count = 5)
         {
             // Initialize empty list to store results in
-            List<HddFile> results = new List<HddFile>();
+            List<File> results = new List<File>();
             // Get count of similar tags for each file
-            foreach (HddFile f in Files)
+            foreach (File f in Files)
             {
                 // if not the original file
                 if (f != file)
@@ -333,7 +333,7 @@ namespace HardDrive
             }
 
 
-            List<HddFile> top = new List<HddFile>();
+            List<File> top = new List<File>();
             // Get max from list <count> times
             for (int i = 0; i < count; i++)
             {
@@ -343,11 +343,11 @@ namespace HardDrive
                     return top;
                 }
 
-                HddFile max = results[0];
+                File max = results[0];
                 int ind = 0, counter = 0;
 
                 // basic get max alg (n complexity)
-                foreach (HddFile f in results)
+                foreach (File f in results)
                 {
                     if (f.Relevance > max.Relevance)
                     {
@@ -368,7 +368,7 @@ namespace HardDrive
             }
 
             // reset relevance for next search
-            foreach (HddFile f in results)
+            foreach (File f in results)
             {
                 f.Relevance = 0;
             }
